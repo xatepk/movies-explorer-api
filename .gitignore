@@ -3,10 +3,12 @@
 # dependencies
 *.vscode
 *node_modules
+*.log
 /.pnp
 .pnp.js
 *.log
 *.test.js
+*.env
 
 # testing
 /coverage
