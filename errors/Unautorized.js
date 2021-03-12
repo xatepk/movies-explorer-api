@@ -3,7 +3,7 @@ class Unautorized extends Error {
     super();
 
     this.message = message;
-    this.status = ('401');
+    this.status = (401);
   }
 }
 

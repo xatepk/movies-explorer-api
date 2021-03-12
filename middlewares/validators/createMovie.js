@@ -15,7 +15,7 @@ const createMovie = celebrate({
       .messages({
         'any.require': 'Обязательное поле',
       }),
-    movieId: Joi.string().required()
+    movieId: Joi.number().required()
       .messages({
         'any.require': 'Обязательное поле',
       }),

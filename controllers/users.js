@@ -3,11 +3,14 @@ const jwt = require('jsonwebtoken');
 const { JWT_SECRET, JWT_TTL } = require('../config/index');
 const User = require('../models/user');
 const { NotFound, Conflict, Unautorized } = require('../errors/index');
+const {
+  userNotFound, userUnautorized, userCreate, userConflict,
+} = require('../config/constants');
 
 module.exports.getUserInfo = (req, res, next) => User.findById(req.user._id)
   .then((user) => {
     if (!user) {
-      throw new NotFound('Нет пользователя с таким id');
+      throw new NotFound(userNotFound);
     }
     res.status(200).send(user);
   })
@@ -19,7 +22,7 @@ module.exports.updateProfile = (req, res, next) => {
   return User.findByIdAndUpdate(req.user._id, { name, email }, { new: true })
     .then((user) => {
       if (!user) {
-        throw new NotFound('Нет пользователя с таким id');
+        throw new NotFound(userNotFound);
       }
       res.status(200).send(user);
     })
@@ -32,7 +35,7 @@ module.exports.login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new Unautorized('Неправильные логин или пароль');
+        throw new Unautorized(userUnautorized);
       }
 
       return bcrypt.compare(password, user.password)
@@ -40,7 +43,7 @@ module.exports.login = (req, res, next) => {
           if (isValid) {
             return user;
           }
-          throw new Unautorized('Неправильные логин или пароль');
+          throw new Unautorized(userUnautorized);
         });
     })
     .then(({ _id }) => {
@@ -60,12 +63,12 @@ module.exports.createUser = (req, res, next) => {
   User.findOne({ email })
     .then((user) => {
       if (user) {
-        throw new Conflict('Данный email уже используется');
+        throw new Conflict(userConflict);
       }
 
       return bcrypt.hash(password, 10);
     })
     .then((hash) => User.create({ email, password: hash, name }))
-    .then((user) => res.send({ message: `Пользователь ${user.email} создан` }))
+    .then((user) => res.send({ message: `${userCreate} ${user.email}` }))
     .catch(next);
 };

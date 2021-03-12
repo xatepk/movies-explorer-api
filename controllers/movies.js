@@ -1,12 +1,15 @@
 const Movie = require('../models/movie');
 const { NotFound, Forbidden, Conflict } = require('../errors/index');
+const {
+  moviesNotFound, moviesConflict, movieNotFound, movieDeleteForbidden, movieDelete,
+} = require('../config/constants');
 
 module.exports.getMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
     .orFail(() => {
-      throw new NotFound('Фильмы не найдены');
+      throw new NotFound(moviesNotFound);
     })
-    .then((movies) => res.status(200).send(movies))
+    .then((movies) => res.send(movies))
     .catch(next);
 };
 
@@ -19,7 +22,7 @@ module.exports.createMovie = (req, res, next) => {
   Movie.findOne({ movieId })
     .then((id) => {
       if (id) {
-        throw new Conflict('Фильм с таким идентификатором уже существует');
+        throw new Conflict(moviesConflict);
       }
       Movie.create({
         owner: req.user._id,
@@ -37,23 +40,27 @@ module.exports.createMovie = (req, res, next) => {
       })
         .then((movie) => {
           if (!movie) {
-            throw new NotFound('Фильмы не найдены');
+            throw new NotFound(moviesNotFound);
           }
-          res.status(200).send(movie);
+          res.send(movie);
         })
         .catch(next);
     })
     .catch(next);
 };
 
-module.exports.deleteMovie = (req, res, next) => Movie.findOneAndDelete(
-  { movieId: req.params.movieId },
+module.exports.deleteMovie = (req, res, next) => Movie.findById(
+  { _id: req.params.movieId },
 )
-  .orFail(new NotFound('Фильм не найден'))
+  .orFail(new NotFound(movieNotFound))
   .then((movie) => {
     if (movie.owner.toString() !== req.user._id) {
-      throw new Forbidden('Нет прав');
+      throw new Forbidden(movieDeleteForbidden);
     }
-    res.status(200).send({ message: 'Фильм удален!' });
+    Movie.findOneAndRemove(
+      { _id: req.params.movieId },
+    )
+      .then(() => res.send({ message: movieDelete }))
+      .catch(next);
   })
   .catch(next);
