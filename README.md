@@ -4,7 +4,7 @@ Backend приложения Movies Explorer - дипломного проект
 Доступен по Url: http://api.movies-explorer.students.nomoredomains.monster
 
 # Стек:
-Javascript
-Node
-Express
-MongoDB
+- Javascript<br>
+- Node<br>
+- Express<br>
+- MongoDB<br>
