@@ -21,7 +21,7 @@ module.exports.createMovie = (req, res, next) => {
 
   Movie.findOne({ movieId })
     .then((id) => {
-      if (id) {
+      if (id && (id.owner === req.user._id)) {
         throw new Conflict(moviesConflict);
       }
       Movie.create({
